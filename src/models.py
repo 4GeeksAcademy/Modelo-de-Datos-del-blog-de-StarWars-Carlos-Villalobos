@@ -38,6 +38,7 @@ class Characters(db.Model):
 
     def serialize(self):
         return {
+            "name": self.name,
             "id": self.id,
             "image_url": self.image_url,
             "description": self.description,
@@ -47,6 +48,7 @@ class Characters(db.Model):
 class Planets(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     image_url: Mapped[str] = mapped_column(String(255), nullable=False) # URL de la imagen/video
+    name: Mapped[str] = mapped_column(String(50), nullable=False) 
     description: Mapped[str] = mapped_column(Text, nullable=True) # Descripción del planeta
     gravity: Mapped[int] = mapped_column(Integer, nullable=False)
 
@@ -60,6 +62,7 @@ class Planets(db.Model):
             "image_url": self.image_url,
             "description": self.description,
             "gravity": self.gravity,
+            "name": self.name
         }
 
 class Favorites(db.Model):
@@ -69,11 +72,22 @@ class Favorites(db.Model):
     user_id: Mapped[int] = mapped_column(ForeignKey('user.id'), nullable=False)
     user = relationship('User', back_populates='favorites') # Relación inversa a User
 
-    character_id: Mapped[int] = mapped_column(ForeignKey('characters.id'), nullable=False)
+    character_id: Mapped[int] = mapped_column(ForeignKey('characters.id'), nullable=True)
     characters = relationship('Characters', back_populates='favorites') # Relación inversa a Character
 
-    planets_id: Mapped[int] = mapped_column(ForeignKey('planets.id'), nullable=False)
+    planets_id: Mapped[int] = mapped_column(ForeignKey('planets.id'), nullable=True)
     planets = relationship('Planets', back_populates='favorites') # Relación inversa a Character
+
+    __table_args__ = (
+        db.UniqueConstraint(
+            'user_id', 'character_id', 
+            name='_user_character_uc', 
+        ),
+        db.UniqueConstraint(
+            'user_id', 'planets_id', 
+            name='_user_planet_uc'
+        )
+    )
 
 
     def __repr__(self):
@@ -83,7 +97,7 @@ class Favorites(db.Model):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "character_id": self.content_id,
+            "character_id": self.character_id,
             "planets_id": self.planets_id
         }
 
