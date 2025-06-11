@@ -26,6 +26,8 @@ class User(db.Model):
 
 class Characters(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(50), nullable=False)
+    eye_color: Mapped[str] = mapped_column(String(20), nullable=False)
     image_url: Mapped[str] = mapped_column(String(255), nullable=False) # URL de la imagen/video
     description: Mapped[str] = mapped_column(Text, nullable=True) # Descripción del personaje
     birthdate: Mapped[date] = mapped_column(Date, nullable=False)
